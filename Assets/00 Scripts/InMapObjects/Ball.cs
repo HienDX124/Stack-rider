@@ -19,11 +19,11 @@ public class Ball : MonoBehaviour
         if (isLoseInMap || !isCollected) return;
         if (rollAhead)
         {
-            meshGO.transform.Rotate(-PlayerBall.instance.GetSpeed() * PlayerBall.instance.ballRotateRateSpeed, 0, 0, Space.World);
+            meshGO.transform.Rotate(PlayerBall.instance.GetSpeed() * PlayerBall.instance.ballRotateRateSpeed, 0, 0, Space.World);
         }
         else
         {
-            meshGO.transform.Rotate(PlayerBall.instance.GetSpeed() * PlayerBall.instance.ballRotateRateSpeed, 0, 0, Space.World);
+            meshGO.transform.Rotate(-PlayerBall.instance.GetSpeed() * PlayerBall.instance.ballRotateRateSpeed, 0, 0, Space.World);
         }
     }
 
@@ -35,8 +35,6 @@ public class Ball : MonoBehaviour
 
     public void ReverseRollDir(int ballAmount)
     {
-
-        // this.rollAhead = ballAmount % 2 == 1;
         this.rollAhead = !this.rollAhead;
     }
 

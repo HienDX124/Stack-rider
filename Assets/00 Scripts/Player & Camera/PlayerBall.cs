@@ -63,7 +63,7 @@ public class PlayerBall : MonoBehaviour
         if (transform.position.z > endPoint.position.z)
         {
             transform.Translate(endPoint.position.normalized * Time.deltaTime * speed);
-            BallRotateAnim(ballsCollected.Count % 2 == 1);
+            BallRotateAnim(ballsCollected.Count % 2 == 0);
         }
         else
         {
@@ -75,7 +75,6 @@ public class PlayerBall : MonoBehaviour
     {
         StopMove();
         ballsCollected = new Stack<Ball>();
-        // ballsCollected.Clear();
         if (ballsContainer.transform.childCount > 0)
         {
             for (int i = 0; i < ballsContainer.transform.childCount; i++)
@@ -268,9 +267,6 @@ public class PlayerBall : MonoBehaviour
     public void LoseBallByLava()
     {
         Destroy(LoseBall().gameObject);
-
-        // Play FX ball destroy by lava
-
     }
 
     public void CollectCoin(int amount)
@@ -308,7 +304,6 @@ public class PlayerBall : MonoBehaviour
             Transform ballTransform = ballsCollected.Peek().gameObject.transform;
             smokeFX.transform.position = new Vector3(ballTransform.position.x, ballTransform.position.y + 1, ballTransform.position.z);
         }
-        // smokeFX.transform.position = new Vector3(transform.position.x, ballsCollected.Count + 1, transform.position.z);
     }
 
     public float GetSpeed()
@@ -358,6 +353,5 @@ public class PlayerBall : MonoBehaviour
         sphereCollider.enabled = false;
 
         GameManager.instance.endGamePanelManager.ShowPopup(true);
-        // EventDispatcher.Instance.PostEvent(EventID.BallsExpodeDone);
     }
 }

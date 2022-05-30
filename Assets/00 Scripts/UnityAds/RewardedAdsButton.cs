@@ -1,12 +1,16 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Advertisements;
+using UnityEngine.Events;
 
 public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowListener
 {
     [SerializeField] string _androidAdUnitId = "Rewarded_Android";
     [SerializeField] string _iOSAdUnitId = "Rewarded_iOS";
     string _adUnitId = null; // This will remain null for unsupported platforms
+    public UnityAction OnCompleteAction = null;
+    public UnityAction OnFailedToLoadAction = null;
+    public UnityAction OnShowFailureAction = null;
 
     void Awake()
     {
@@ -48,6 +52,7 @@ public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAds
         Advertisement.Show(_adUnitId, this);
     }
 
+
     // Implement the Show Listener's OnUnityAdsShowComplete callback method to determine if the user gets a reward:
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
@@ -55,7 +60,8 @@ public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAds
         {
             Debug.Log("Player get reward here");
             // Grant a reward.
-
+            OnCompleteAction?.Invoke();
+            OnCompleteAction = null;
             // Load another ad:
             Advertisement.Load(_adUnitId, this);
         }
@@ -66,12 +72,16 @@ public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAds
     {
         Debug.Log($"Error loading Ad Unit {adUnitId}: {error.ToString()} - {message}");
         // Use the error details to determine whether to try to load another ad.
+        OnFailedToLoadAction?.Invoke();
+        OnFailedToLoadAction = null;
     }
 
     public void OnUnityAdsShowFailure(string adUnitId, UnityAdsShowError error, string message)
     {
         Debug.Log($"Error showing Ad Unit {adUnitId}: {error.ToString()} - {message}");
         // Use the error details to determine whether to try to load another ad.
+        OnShowFailureAction?.Invoke();
+        OnShowFailureAction = null;
     }
 
     public void OnUnityAdsShowStart(string adUnitId) { }

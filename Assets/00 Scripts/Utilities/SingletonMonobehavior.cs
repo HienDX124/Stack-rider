@@ -2,20 +2,20 @@ using UnityEngine;
 
 public abstract class SingletonMonobehaviour<T> : MonoBehaviour where T : MonoBehaviour
 {
-    private static T instance;
-    public static T Instance
+    private static T Instance;
+    public static T instance
     {
         get
         {
-            return instance;
+            return Instance;
         }
     }
 
     protected virtual void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this as T;
+            Instance = this as T;
         }
         else
         {

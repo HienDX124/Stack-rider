@@ -9,8 +9,6 @@ public class EndGamePanelManager : MonoBehaviour
     public GameObject backGround;
     public GameObject loseGO;
     public GameObject winGO;
-
-
     public Button SkipLevel;
     public Button TryAgain;
 
@@ -19,16 +17,13 @@ public class EndGamePanelManager : MonoBehaviour
 
     private void OnEnable()
     {
-        SkipLevel.onClick.AddListener(GameManager.instance.NextLevel);
+        SkipLevel.onClick.AddListener(SkipLevelButtonOnclick);
 
-        TryAgain.onClick.AddListener(GameManager.instance.LoadLevel);
+        TryAgain.onClick.AddListener(TryAgainButtonOnclick);
 
-        x2Coin.onClick.AddListener(GameManager.instance.SetPlayerCoin);
-        x2Coin.onClick.AddListener(GameManager.instance.SetPlayerCoin);
-        x2Coin.onClick.AddListener(GameManager.instance.NextLevel);
+        x2Coin.onClick.AddListener(x2CoinsButtonOnclick);
 
-        NoThanks.onClick.AddListener(GameManager.instance.SetPlayerCoin);
-        NoThanks.onClick.AddListener(GameManager.instance.NextLevel);
+        NoThanks.onClick.AddListener(NoThanksButtonOnclick);
     }
 
     private void OnDisable()
@@ -69,13 +64,61 @@ public class EndGamePanelManager : MonoBehaviour
         loseGO.SetActive(!isWin);
     }
 
-
     public void HidePopup()
     {
-        // backGround.GetComponent<Image>().enabled = false;
         backGround.SetActive(false);
         winGO.SetActive(false);
         loseGO.SetActive(false);
+    }
+
+    private void SkipLevelButtonOnclick()
+    {
+        AdsManager.instance.ShowRewardedAds(
+            () =>
+            {
+                GameManager.instance.NextLevel();
+            },
+            () =>
+            {
+                Debug.LogWarning("Fail to load rewarded ads");
+            },
+            () =>
+            {
+                Debug.LogWarning("Rewarded ads not show completely");
+            }
+        );
+    }
+
+    private void TryAgainButtonOnclick()
+    {
+        GameManager.instance.LoadLevel();
+    }
+
+    private void x2CoinsButtonOnclick()
+    {
+        AdsManager.instance.ShowRewardedAds(
+            () =>
+            {
+                GameManager.instance.SetPlayerCoin();
+                GameManager.instance.SetPlayerCoin();
+                GameManager.instance.NextLevel();
+            },
+            () =>
+            {
+                Debug.LogWarning("Fail to load rewarded ads");
+            },
+            () =>
+            {
+                NoThanksButtonOnclick();
+                Debug.LogWarning("Rewarded ads not show completely");
+            }
+        );
+    }
+
+    private void NoThanksButtonOnclick()
+    {
+        GameManager.instance.SetPlayerCoin();
+        GameManager.instance.NextLevel();
     }
 
 }

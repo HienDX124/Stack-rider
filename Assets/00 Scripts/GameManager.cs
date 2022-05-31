@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
+public class GameManager : SingletonMonobehaviour<GameManager>
 {
     public PlayerBall playerBall;
     public TutorialManager tutorialManager;
     public bool isLose;
-    public static GameManager instance;
     public bool isGamePlaying = true;
     public List<GameObject> levelPrefabs;
     [SerializeField] Transform levelRoot;
@@ -19,10 +18,7 @@ public class GameManager : MonoBehaviour
     public int levelNumber;
     [SerializeField] private MeshRenderer quadMeshRenderer;
     [SerializeField] private List<Material> bgrMaterial;
-    private void Awake()
-    {
-        instance = this;
-    }
+
     private void Start()
     {
         isLose = false;
@@ -153,6 +149,7 @@ public class GameManager : MonoBehaviour
         levelNumber += 1;
         SetLevelNumber(levelNumber);
         LoadLevel();
+        AdsManager.instance.ShowInterstitialAds();
     }
 
     public int GetPlayerCoin()

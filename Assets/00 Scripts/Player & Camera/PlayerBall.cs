@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerBall : MonoBehaviour
+public class PlayerBall : SingletonMonobehaviour<PlayerBall>
 {
     public Transform endPoint;
     [SerializeField] private Transform ballsContainer;
@@ -15,7 +15,6 @@ public class PlayerBall : MonoBehaviour
     public int coinInLevel;
     public bool isStop;
     public Stack<Ball> ballsCollected;
-    public static PlayerBall instance;
     [SerializeField] private GameObject meshGO;
 
     public float ballRotateRateSpeed;
@@ -24,9 +23,10 @@ public class PlayerBall : MonoBehaviour
     [HideInInspector] public GameObject smokeFX;
 
     private Vector3 showTextPos;
-    private void Awake()
+    protected override void Awake()
     {
-        instance = this;
+        base.Awake();
+
         sphereCollider = GetComponent<SphereCollider>();
     }
 

@@ -7,6 +7,7 @@ public class AdsManager : SingletonMonobehaviour<AdsManager>
 {
     [SerializeField] private RewardedAdsButton rewardedAds;
     [SerializeField] private InterstitialAdsButton interstitialAds;
+    [SerializeField] private BannerAds bannerAds;
 
     protected override void Awake()
     {

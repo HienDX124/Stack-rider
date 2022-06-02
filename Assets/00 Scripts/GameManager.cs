@@ -18,6 +18,7 @@ public class GameManager : SingletonMonobehaviour<GameManager>
     public int levelNumber;
     [SerializeField] private MeshRenderer quadMeshRenderer;
     [SerializeField] private List<Material> bgrMaterial;
+    [SerializeField] private RectTransform startPlayRangeRect;
 
     private void Start()
     {
@@ -29,12 +30,38 @@ public class GameManager : SingletonMonobehaviour<GameManager>
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0) && !isGamePlaying)
+        if (isGamePlaying) return;
+
+        if (MouseOnElement(startPlayRangeRect))
         {
-            isGamePlaying = true;
-            tutorialManager.EnableTutorial(false);
-            playerBall.StartPlay();
+            if (Input.GetMouseButtonDown(0))
+            {
+                isGamePlaying = true;
+                tutorialManager.EnableTutorial(false);
+                playerBall.StartPlay();
+            }
         }
+    }
+
+    private bool MouseOnElement(RectTransform rectTransform)
+    {
+        Vector3[] corners = new Vector3[4];
+        rectTransform.GetWorldCorners(corners);
+
+        float xMin = corners[0].x;
+        float xMax = corners[2].x;
+
+        float yMin = corners[0].y;
+        float yMax = corners[2].y;
+
+        if ((Input.mousePosition.x > xMax || Input.mousePosition.x < xMin)
+            ||
+            (Input.mousePosition.y > yMax || Input.mousePosition.y < yMin))
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public void BallMoveLeftRight(float xPos)

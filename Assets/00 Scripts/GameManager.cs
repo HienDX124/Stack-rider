@@ -12,19 +12,31 @@ public class GameManager : SingletonMonobehaviour<GameManager>
     public List<GameObject> levelPrefabs;
     [SerializeField] Transform levelRoot;
     private GameObject currentLevel;
-    [SerializeField] public EndGamePanelManager endGamePanelManager;
     [SerializeField] private FloatingTextManager floatingTextManager;
     [SerializeField] private BallManager ballManager;
-    public int levelNumber;
     [SerializeField] private MeshRenderer quadMeshRenderer;
     [SerializeField] private List<Material> bgrMaterial;
     [SerializeField] private RectTransform startPlayRangeRect;
 
+    private bool _isPause = false;
+
+    public bool isPause { get => _isPause; private set => _isPause = value; }
+
+    private void OnEnable()
+    {
+        EventDispatcher.Instance.RegisterListener(EventID.Pause, SetPause);
+    }
+
+    private void OnDisable()
+    {
+        EventDispatcher.Instance.RemoveListener(EventID.Pause, SetPause);
+    }
+
     private void Start()
     {
+        isPause = false;
         isLose = false;
         SetFPS(Constant.FPS);
-        levelNumber = GetLevelNumber();
         LoadLevel();
     }
 
@@ -77,9 +89,8 @@ public class GameManager : SingletonMonobehaviour<GameManager>
         if (levelRoot.childCount > 0)
             Destroy(levelRoot.GetChild(0).gameObject);
 
-
-        if (levelNumber < levelPrefabs.Count)
-            currentLevel = Instantiate<GameObject>(levelPrefabs[levelNumber - 1], levelRoot);
+        if (UserData.LevelNumber < levelPrefabs.Count)
+            currentLevel = Instantiate<GameObject>(levelPrefabs[UserData.LevelNumber - 1], levelRoot);
         else
         {
             currentLevel = Instantiate<GameObject>(levelPrefabs[UnityEngine.Random.Range(0, levelPrefabs.Count)], levelRoot);
@@ -91,9 +102,9 @@ public class GameManager : SingletonMonobehaviour<GameManager>
         playerBall.Init(levelInfo);
         ballManager.Init(levelInfo.ballMapContainer);
 
-        EventDispatcher.Instance.PostEvent(EventID.LoadLevel, levelNumber);
+        EventDispatcher.Instance.PostEvent(EventID.LoadLevel, UserData.LevelNumber);
 
-        endGamePanelManager.HidePopup();
+        UIManager.instance.HidePopup();
 
         ChangeBackGroundColor(bgrMaterial[UnityEngine.Random.Range(0, bgrMaterial.Count)]);
     }
@@ -101,25 +112,6 @@ public class GameManager : SingletonMonobehaviour<GameManager>
     private void ChangeBackGroundColor(Material material)
     {
         quadMeshRenderer.material = material;
-    }
-
-    private int GetLevelNumber()
-    {
-        if (PlayerPrefs.HasKey(Constant.KEY_LEVEL))
-        {
-            return PlayerPrefs.GetInt(Constant.KEY_LEVEL, 0);
-        }
-        else
-        {
-            PlayerPrefs.SetInt(Constant.KEY_LEVEL, 1);
-            return 1;
-        }
-    }
-
-    // Set level number
-    public void SetLevelNumber(int level)
-    {
-        PlayerPrefs.SetInt(Constant.KEY_LEVEL, level);
     }
 
     public void EndLevel(bool isWin)
@@ -134,13 +126,12 @@ public class GameManager : SingletonMonobehaviour<GameManager>
             Vibrator.Vibrate(Constant.STRONG_VIBRATE);
             EventDispatcher.Instance.PostEvent(EventID.ChangeCharacterState, Constant.WIN);
             StartCoroutine(WaitBallsExplodeThenPopup());
-            SetPlayerScore(playerBall.coinInLevel);
         }
         else
         {
             Vibrator.Vibrate(Constant.WEAK_VIBRATE);
             EventDispatcher.Instance.PostEvent(EventID.ChangeCharacterState, Constant.LOSE);
-            endGamePanelManager.ShowPopup(isWin);
+            UIManager.instance.ShowPopup(isWin);
         }
     }
 
@@ -150,43 +141,11 @@ public class GameManager : SingletonMonobehaviour<GameManager>
         playerBall.DestroyBallWhenWinAndShowPopup();
     }
 
-    public void SetPlayerCoin()
-    {
-        if (PlayerPrefs.HasKey(Constant.KEY_SAVE_COIN))
-            PlayerPrefs.SetInt(Constant.KEY_SAVE_COIN, PlayerPrefs.GetInt(Constant.KEY_SAVE_COIN) + playerBall.coinInLevel);
-        else
-        {
-            PlayerPrefs.SetInt(Constant.KEY_SAVE_COIN, playerBall.coinInLevel);
-        }
-        EventDispatcher.Instance.PostEvent(EventID.UpdateCoin);
-    }
-
-    public void SetPlayerScore(int scoreAmount)
-    {
-        if (PlayerPrefs.HasKey(Constant.KEY_SAVE_SCORE))
-            PlayerPrefs.SetInt(Constant.KEY_SAVE_SCORE, PlayerPrefs.GetInt(Constant.KEY_SAVE_SCORE) + scoreAmount);
-        else
-        {
-            PlayerPrefs.SetInt(Constant.KEY_SAVE_SCORE, 1);
-        }
-    }
-
     public void NextLevel()
     {
-        levelNumber += 1;
-        SetLevelNumber(levelNumber);
+        UserData.LevelNumber++;
         LoadLevel();
         AdsManager.instance.ShowInterstitialAds();
-    }
-
-    public int GetPlayerCoin()
-    {
-        return PlayerPrefs.GetInt(Constant.KEY_SAVE_COIN);
-    }
-
-    public int GetPlayerScore()
-    {
-        return PlayerPrefs.GetInt(Constant.KEY_SAVE_SCORE);
     }
 
     private void SetFPS(int fps)
@@ -197,6 +156,11 @@ public class GameManager : SingletonMonobehaviour<GameManager>
     public void ShowFloatingText(string msg, int fontSize, Color color, Vector3 position, Vector3 motion, float duration)
     {
         floatingTextManager.Show(msg, fontSize, color, position, motion, duration);
+    }
+
+    private void SetPause(object param = null)
+    {
+        isPause = (bool)param;
     }
 
 }

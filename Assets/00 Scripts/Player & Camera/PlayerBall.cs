@@ -21,7 +21,6 @@ public class PlayerBall : SingletonMonobehaviour<PlayerBall>
 
     [SerializeField] private GameObject smokeFXPrefab;
     [HideInInspector] public GameObject smokeFX;
-
     private Vector3 showTextPos;
     protected override void Awake()
     {
@@ -59,7 +58,7 @@ public class PlayerBall : SingletonMonobehaviour<PlayerBall>
 
     void Update()
     {
-        if (isStop) return;
+        if (isStop || GameManager.instance.isPause) return;
         if (transform.position.z > endPoint.position.z)
         {
             transform.Translate(endPoint.position.normalized * Time.deltaTime * speed);
@@ -269,11 +268,13 @@ public class PlayerBall : SingletonMonobehaviour<PlayerBall>
         Destroy(LoseBall().gameObject);
     }
 
-    public void CollectCoin(int amount)
+    public void CollectCoin(int amount, bool increaseScore = true)
     {
         coinInLevel += amount;
-        EventDispatcher.Instance.PostEvent(EventID.UpdateCoin, coinInLevel);
-        EventDispatcher.Instance.PostEvent(EventID.UpdateScore, amount);
+        UserData.CoinsNumber += amount;
+        UserData.ScoreNumber += amount;
+        EventDispatcher.Instance.PostEvent(EventID.UpdateCoin);
+        EventDispatcher.Instance.PostEvent(EventID.UpdateScore);
         Vibrator.Vibrate(Constant.WEAK_VIBRATE);
     }
 
@@ -282,7 +283,6 @@ public class PlayerBall : SingletonMonobehaviour<PlayerBall>
         this.speed = 0;
         smokeFX.SetActive(false);
         isStop = true;
-
     }
 
     public void StartMove()
@@ -317,7 +317,7 @@ public class PlayerBall : SingletonMonobehaviour<PlayerBall>
         StartCoroutine(DestroyBallWhenWinCoroutine(Constant.DELAY_TO_DESTROY_BALL / explodeTime));
     }
 
-    IEnumerator DestroyBallWhenWinCoroutine(float delay)
+    private IEnumerator DestroyBallWhenWinCoroutine(float delay)
     {
         int coinCount = 0;
         while (ballsCollected.Count > 0)
@@ -352,6 +352,6 @@ public class PlayerBall : SingletonMonobehaviour<PlayerBall>
         this.meshGO.SetActive(false);
         sphereCollider.enabled = false;
 
-        GameManager.instance.endGamePanelManager.ShowPopup(true);
+        UIManager.instance.ShowPopup(true);
     }
 }

@@ -3,25 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class UIManager : SingletonMonobehaviour<UIManager>
 {
 
-    public Text coinText;
-    public Text levelText;
-    public Text scoreText;
-    private int currentLevel;
-    private void Awake()
-    {
-        currentLevel = PlayerPrefs.GetInt(Constant.KEY_LEVEL);
-    }
+    [SerializeField] private Text coinText;
+    [SerializeField] private Text levelText;
+    [SerializeField] private Text scoreText;
 
     private void OnEnable()
     {
         EventDispatcher.Instance.RegisterListener(EventID.UpdateCoin, UpdateCoinUI);
         EventDispatcher.Instance.RegisterListener(EventID.LoadLevel, UpdateLevelUI);
         EventDispatcher.Instance.RegisterListener(EventID.UpdateScore, UpdateScoreUI);
-        EventDispatcher.Instance.RegisterListener(EventID.LoadLevel, ShowScoreUIWenEndLevel);
+        EventDispatcher.Instance.RegisterListener(EventID.LoadLevel, ShowScoreUIWhenEndLevel);
         EventDispatcher.Instance.RegisterListener(EventID.StartPlay, HideScoreUIWhenStartPlay);
+
+        SkipLevel.onClick.AddListener(SkipLevelButtonOnclick);
+        TryAgain.onClick.AddListener(TryAgainButtonOnclick);
+        x2Coin.onClick.AddListener(x2CoinsButtonOnclick);
+        NoThanks.onClick.AddListener(NoThanksButtonOnclick);
     }
 
     private void OnDisable()
@@ -29,8 +29,13 @@ public class UIManager : MonoBehaviour
         EventDispatcher.Instance.RemoveListener(EventID.UpdateCoin, UpdateCoinUI);
         EventDispatcher.Instance.RemoveListener(EventID.LoadLevel, UpdateLevelUI);
         EventDispatcher.Instance.RemoveListener(EventID.UpdateScore, UpdateScoreUI);
-        EventDispatcher.Instance.RemoveListener(EventID.LoadLevel, ShowScoreUIWenEndLevel);
+        EventDispatcher.Instance.RemoveListener(EventID.LoadLevel, ShowScoreUIWhenEndLevel);
         EventDispatcher.Instance.RemoveListener(EventID.StartPlay, HideScoreUIWhenStartPlay);
+
+        SkipLevel.onClick.RemoveAllListeners();
+        TryAgain.onClick.RemoveAllListeners();
+        x2Coin.onClick.RemoveAllListeners();
+        NoThanks.onClick.RemoveAllListeners();
     }
 
     private void Start()
@@ -40,29 +45,19 @@ public class UIManager : MonoBehaviour
 
     private void UpdateCoinUI(object param = null)
     {
-        if (param != null)
-        {
-            int coinAmount = (int)param;
-            coinText.text = (GameManager.instance.GetPlayerCoin() + coinAmount).ToString();
-        }
-        else
-            coinText.text = (GameManager.instance.GetPlayerCoin()).ToString();
+        coinText.text = (UserData.CoinsNumber).ToString();
     }
 
     private void UpdateLevelUI(object param = null)
     {
-        currentLevel = (int)param;
-        string nText = $"Level: {currentLevel}";
-        levelText.text = nText;
+        levelText.text = $"Level: {UserData.LevelNumber}";
     }
 
     private void UpdateScoreUI(object param = null)
     {
         Text scoreAmountUI = scoreText.transform.GetChild(0).gameObject.GetComponent<Text>();
-        int scoreAmount = (int)param;
 
-        GameManager.instance.SetPlayerScore(scoreAmount);
-        scoreAmountUI.text = (GameManager.instance.GetPlayerScore()).ToString();
+        scoreAmountUI.text = UserData.ScoreNumber.ToString();
     }
 
     private void HideScoreUIWhenStartPlay(object param = null)
@@ -70,9 +65,92 @@ public class UIManager : MonoBehaviour
         scoreText.gameObject.SetActive(false);
     }
 
-    private void ShowScoreUIWenEndLevel(object param = null)
+    private void ShowScoreUIWhenEndLevel(object param = null)
     {
         scoreText.gameObject.SetActive(true);
+    }
+
+    public GameObject loseGO;
+    public GameObject winGO;
+    public Button SkipLevel;
+    public Button TryAgain;
+
+    public Button x2Coin;
+    public Button NoThanks;
+
+    protected override void Awake()
+    {
+        base.Awake();
+    }
+
+    public void ShowPopup(bool isWin)
+    {
+
+        EventDispatcher.Instance.PostEvent(EventID.ShowPopup);
+
+        StartCoroutine(EnableButton(isWin));
+    }
+
+    private IEnumerator EnableButton(bool isWin)
+    {
+        yield return new WaitForSeconds(.3f);
+        winGO.SetActive(isWin);
+        loseGO.SetActive(!isWin);
+    }
+
+    public void HidePopup()
+    {
+        EventDispatcher.Instance.PostEvent(EventID.HidePopup);
+        winGO.SetActive(false);
+        loseGO.SetActive(false);
+    }
+
+    private void SkipLevelButtonOnclick()
+    {
+        AdsManager.instance.ShowRewardedAds(
+            () =>
+            {
+                GameManager.instance.NextLevel();
+            },
+            () =>
+            {
+                Debug.LogWarning("Fail to load rewarded ads");
+            },
+            () =>
+            {
+                Debug.LogWarning("Rewarded ads not show completely");
+            }
+        );
+    }
+
+    private void TryAgainButtonOnclick()
+    {
+        GameManager.instance.LoadLevel();
+    }
+
+    private void x2CoinsButtonOnclick()
+    {
+        AdsManager.instance.ShowRewardedAds(
+            () =>
+            {
+                PlayerBall.instance.CollectCoin(PlayerBall.instance.coinInLevel, false);
+                GameManager.instance.NextLevel();
+            },
+            () =>
+            {
+                Debug.LogWarning("Fail to load rewarded ads");
+            },
+            () =>
+            {
+                NoThanksButtonOnclick();
+                Debug.LogWarning("Rewarded ads not show completely");
+            }
+        );
+    }
+
+    private void NoThanksButtonOnclick()
+    {
+        GameManager.instance.NextLevel();
     }
 
 }

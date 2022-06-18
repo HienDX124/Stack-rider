@@ -4,8 +4,6 @@ public enum EventID
     None = 0,
     EndLevel,
     Pause,
-    OnSelectedStringChange,
-    SetBackGround,
     ShowToast,
     NextLevel,
     UpdateCoin,
@@ -13,5 +11,6 @@ public enum EventID
     LoadLevel,
     ChangeCharacterState,
     StartPlay,
-    BallsExpodeDone,
+    ShowPopup,
+    HidePopup,
 }

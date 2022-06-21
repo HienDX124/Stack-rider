@@ -1,0 +1,23 @@
+[
+  {
+    "ID": 0,
+    "name": "Em dạo này",
+    "singer": "Ngọt",
+    "path": "./music/Em Dao Nay - Ngot.mp3 ",
+    "image": "./img/emDaoNay.png"
+  },
+  {
+    "ID": 1,
+    "name": "Sài Gòn đau lòng quá",
+    "singer": "Ngô Lan Hương (Cover)",
+    "path": "./music/SaiGonDauLongQua-HuaKimTuyenHoangDuyen-6992977.mp3",
+    "image": "./img/SaiGonDauLongQua.png"
+  },
+  {
+    "ID": 2,
+    "name": "At my worst",
+    "singer": "Pink Sweat",
+    "path": "./music/At My Worst - Pink Sweat_.mp3",
+    "image": "./img/At_my_worst.png"
+  }
+]

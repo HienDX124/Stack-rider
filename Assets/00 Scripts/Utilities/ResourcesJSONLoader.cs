@@ -4,21 +4,19 @@ using UnityEngine;
 using UnityEngine.Networking;
 using SimpleJSON;
 
-public class ResourcesJSONLoader : MonoBehaviour
+public class ResourcesJSONLoader : SingletonMonobehaviour<ResourcesJSONLoader>
 {
     string urlData = "https://utilities-realtimedb-default-rtdb.asia-southeast1.firebasedatabase.app/.json";
 
-    private void Start()
+    protected override void Awake()
     {
-        // ParseJSONArray("TextData/test1");
-        // StartCoroutine(GetURL(urlData));
+        base.Awake();
 
-
-        _ = new RequestBase(urlData)
-            .Send((res) =>
-            {
-                Debug.LogWarning(res.response);
-            });
+        // _ = new RequestBase(urlData)
+        //     .Send((res) =>
+        //     {
+        //         Debug.LogWarning(res.response);
+        //     });
     }
 
     private static void ParseJSONArray(string path)

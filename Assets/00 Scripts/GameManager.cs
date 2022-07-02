@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using SimpleJSON;
 
 public class GameManager : SingletonMonobehaviour<GameManager>
 {
@@ -21,6 +23,7 @@ public class GameManager : SingletonMonobehaviour<GameManager>
     private bool _isPause = false;
 
     public bool isPause { get => _isPause; private set => _isPause = value; }
+    string urlData = "https://utilities-realtimedb-default-rtdb.asia-southeast1.firebasedatabase.app/.json";
 
     private void OnEnable()
     {
@@ -81,7 +84,7 @@ public class GameManager : SingletonMonobehaviour<GameManager>
         playerBall.DragLeftRight(-xPos);
     }
 
-    public void LoadLevel()
+    public async void LoadLevel()
     {
         tutorialManager.EnableTutorial(true);
         isLose = false;
@@ -95,6 +98,24 @@ public class GameManager : SingletonMonobehaviour<GameManager>
         {
             currentLevel = Instantiate<GameObject>(levelPrefabs[UnityEngine.Random.Range(0, levelPrefabs.Count)], levelRoot);
         }
+
+        #region  TEST LOAD DATA
+
+        // await UniTask.Delay(1000);
+        // _ = new RequestBase(urlData)
+        //     .Send((res) =>
+        //     {
+        //         Debug.LogWarning(res.response);
+        //         JSONArray dataParse = JSONArray.Parse(res.response).AsArray;
+        //         int index = dataParse[0]["ID"].AsInt;
+        //         Debug.LogWarning(index);
+        //         index++;
+        //         Debug.LogWarning(index);
+        //         Destroy(levelRoot.transform.GetChild(0).gameObject);
+        //         currentLevel = Instantiate<GameObject>(levelPrefabs[index], levelRoot);
+        //     });
+
+        #endregion
 
         currentLevel.transform.SetParent(levelRoot);
 
